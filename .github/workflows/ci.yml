@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: MATLAB CI
 
 on:
   push:
@@ -7,61 +7,20 @@ on:
   pull_request:
     branches:
       - main
-  schedule:
-    - cron: '0 0 * * *'  # Runs daily to track metrics
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v1
+
+      - name: Run MATLAB tests
+        uses: matlab-actions/run-tests@v1
         with:
-          node-version: '18'
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run Tests and Generate Coverage Report
-        run: |
-          npm test -- --coverage > coverage.txt
-          cat coverage.txt
-
-      - name: Archive Coverage Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-report
-          path: coverage.txt
-
-      - name: Measure Build Time
-        run: echo "Build took $SECONDS seconds"
-
-  track-metrics:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Fetch Open Issues
-        run: |
-          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/${{ github.repository }}/issues?state=open" \
-          | jq '. | length' > open_issues.txt
-
-      - name: Fetch Closed PRs in Last 30 Days
-        run: |
-          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed" \
-          | jq '[.[] | select(.merged_at != null and (now - (.merged_at | fromdate)) < 2592000)] | length' > closed_prs.txt
-
-      - name: Upload Metrics
-        uses: actions/upload-artifact@v3
-        with:
-          name: ci-metrics
-          path: |
-            open_issues.txt
-            closed_prs.txt
+          source-folder: matlab_code
+          test-results-junit: testResults.xml
 
