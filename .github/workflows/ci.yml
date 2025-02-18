@@ -21,5 +21,5 @@ jobs:
       - name: Run MATLAB tests
         uses: matlab-actions/run-tests@v2
         with:
-          source-folder: matlab_code
+          source-folder: src
           test-results-junit: testResults.xml
