@@ -1,4 +1,4 @@
-classdef test_addition < matlab.unittest.TestCase
+classdef test_subtraction < matlab.unittest.TestCase
     methods (Test)
         function testPositiveNumbers(tc)
             result = subtraction(2, 3);
